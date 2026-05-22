@@ -1,0 +1,13 @@
+README.md
+pyproject.toml
+devmind/__init__.py
+devmind/cli.py
+devmind/config.py
+devmind/dashboard.py
+devmind/tracker.py
+devmind.egg-info/PKG-INFO
+devmind.egg-info/SOURCES.txt
+devmind.egg-info/dependency_links.txt
+devmind.egg-info/entry_points.txt
+devmind.egg-info/requires.txt
+devmind.egg-info/top_level.txt

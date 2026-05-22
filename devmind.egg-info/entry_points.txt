@@ -1,0 +1,2 @@
+[console_scripts]
+devmind = devmind.cli:cli

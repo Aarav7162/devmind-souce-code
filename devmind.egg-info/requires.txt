@@ -1,0 +1,5 @@
+click>=8.0.0
+psutil>=5.9.0
+ecdsa>=0.18.0
+rich>=13.0.0
+pygame>=2.5.0

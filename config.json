@@ -1,0 +1,25 @@
+{
+    "blocked_keywords": [
+        "facebook",
+        "twitter",
+        "reddit",
+        "instagram",
+        "tiktok",
+        "fiverr",
+        "monkeytype",
+        "github",
+        "discord"
+    ],
+    "blocked_apps": [
+        "Spotify.exe",
+        "Discord.exe",
+        "Steam.exe",
+        "dell supportassist os recovery plugin for dell update.exe",
+        "roblox player.lnk",
+        "teams-client.exe"
+    ],
+    "override_key": "@Anakulosmos2025",
+    "xp": 161,
+    "level": 7,
+    "total_focus_minutes": 445.46999999999997
+}

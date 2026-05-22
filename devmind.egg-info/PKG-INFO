@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: devmind
+Version: 0.1.0
+Summary: DevMind Focus — Ruthless deep-work daemon & gamified dashboard
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: click>=8.0.0
+Requires-Dist: psutil>=5.9.0
+Requires-Dist: ecdsa>=0.18.0
+Requires-Dist: rich>=13.0.0
+Requires-Dist: pygame>=2.5.0
+
+# DevMind
+
+Ruthless deep-work daemon and gamified developer focus dashboard.

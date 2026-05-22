@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevMind Interception</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #0f0f15 0%, #030305 100%);
+            padding: 40px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header-logs {
+            font-family: monospace;
+            color: var(--text-muted);
+            font-size: 13px;
+            text-align: left;
+            width: 100%;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .detect-log {
+            color: #ef4444;
+        }
+
+        .intercept-log {
+            color: var(--text-main);
+        }
+
+        .breathing-card {
+            width: 100%;
+            padding: 50px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Ambient Glow Behind Breathing Circle */
+        .ambient-glow {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            transition: all 4s ease-in-out;
+        }
+
+        /* Breathing Circle */
+        .circle-outer {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            position: relative;
+            transition: all 4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .circle-inner {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.05);
+        }
+
+        /* Breathing States */
+        .inhale .circle-outer {
+            width: 220px;
+            height: 220px;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .inhale .circle-inner {
+            width: 160px;
+            height: 160px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.08) 100%);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.15);
+        }
+
+        .inhale .ambient-glow {
+            width: 320px;
+            height: 320px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+        }
+
+        .exhale .circle-outer {
+            width: 130px;
+            height: 130px;
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .exhale .circle-inner {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.02);
+        }
+
+        .exhale .ambient-glow {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+        }
+
+        /* Text and Counter */
+        .instruction {
+            font-family: var(--font-heading);
+            font-size: 24px;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+            height: 35px;
+            color: var(--text-main);
+        }
+
+        .timer-dots {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: var(--text-main);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .lock-text {
+            font-family: monospace;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        /* Post-Breathing Screen Options */
+        .options-pane {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .options-pane h2 {
+            font-family: var(--font-heading);
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+        }
+
+        .stats-summary {
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            max-width: 400px;
+        }
+
+        .stats-highlight {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .action-buttons .btn {
+            flex: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="exhale">
+
+    <div class="container">
+        <!-- Logs (Retro Hacker details in upscale design) -->
+        <div class="header-logs">
+            <span class="detect-log">[detect]</span> <span id="lbl-proc">chrome.exe</span> :: <span id="lbl-site" class="detect-log">youtube.com</span><br>
+            <span class="intercept-log">[intercept]</span> taking over screen in 0ms...
+        </div>
+
+        <!-- Breathing Screen -->
+        <div class="card breathing-card" id="pane-breathing">
+            <div class="ambient-glow"></div>
+            
+            <div class="circle-outer">
+                <div class="circle-inner"></div>
+            </div>
+
+            <div class="instruction" id="lbl-inst">Breathe in...</div>
+
+            <!-- Dots representing countdown -->
+            <div class="timer-dots" id="dots-container"></div>
+
+            <div class="lock-text" id="lbl-timer">unlock in 00:10</div>
+        </div>
+
+        <!-- Options Screen (Shown after breathing is done) -->
+        <div class="options-pane" id="pane-options">
+            <h2>Take a mindful break?</h2>
+            <div class="stats-summary">
+                You have intercepted <span class="stats-highlight" id="lbl-open-count">8 distractions</span> today.
+                Are you sure you want to proceed with <span id="lbl-target-site" class="stats-highlight">youtube.com</span>?
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="closeDistraction()">Back to Focus</button>
+                <button class="btn btn-secondary" onclick="allowGracePeriod()">Open Anyway (5m)</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dynamic Dot creation
+        const totalDuration = 10;
+        const dotsContainer = document.getElementById('dots-container');
+        for (let i = 0; i < totalDuration; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            dotsContainer.appendChild(dot);
+        }
+        const dots = document.querySelectorAll('.dot');
+
+        let remaining = totalDuration;
+        
+        // Breathing sequence control
+        function runBreathingSequence() {
+            // Inhale (0 to 4s) -> Hold (4 to 7s) -> Exhale (7 to 10s)
+            const interval = setInterval(() => {
+                remaining--;
+                
+                // Update dots
+                const filledCount = totalDuration - remaining;
+                dots.forEach((dot, idx) => {
+                    if (idx < filledCount) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+
+                // Update Timer Text
+                document.getElementById('lbl-timer').innerText = `unlock in 00:0${remaining}`;
+
+                // Update breathing animation and text phases
+                if (remaining > 6) {
+                    document.body.className = "inhale";
+                    document.getElementById('lbl-inst').innerText = "Breathe in...";
+                } else if (remaining > 3) {
+                    document.body.className = "exhale"; // hold size is intermediate/small
+                    document.getElementById('lbl-inst').innerText = "Hold...";
+                } else {
+                    document.body.className = "exhale";
+                    document.getElementById('lbl-inst').innerText = "Breathe out...";
+                }
+
+                if (remaining <= 0) {
+                    clearInterval(interval);
+                    completeBreathing();
+                }
+            }, 1000);
+            
+            // Trigger first state immediately
+            document.body.className = "inhale";
+        }
+
+        function completeBreathing() {
+            // Hide breathing pane, show options pane with smooth transition
+            document.getElementById('pane-breathing').style.display = 'none';
+            document.getElementById('pane-options').style.display = 'flex';
+        }
+
+        // Bridge calls to Python
+        function closeDistraction() {
+            if (window.pywebview && window.pywebview.api) {
+                window.pywebview.api.close_distraction();
+            } else {
+                alert("Simulated: Closed distracted window!");
+            }
+        }
+
+        function allowGracePeriod() {
+            if (window.pywebview && window.pywebview.api) {
+                window.pywebview.api.allow_session();
+            } else {
+                alert("Simulated: Allowed 5-minute bypass!");
+            }
+        }
+
+        function initPage() {
+            if (window.pywebview && window.pywebview.api) {
+                window.pywebview.api.get_details().then(data => {
+                    const info = JSON.parse(data);
+                    document.getElementById('lbl-proc').innerText = info.proc;
+                    document.getElementById('lbl-site').innerText = info.site;
+                    document.getElementById('lbl-target-site').innerText = info.site;
+                    
+                    const cnt = info.count;
+                    document.getElementById('lbl-open-count').innerText = cnt + (cnt === 1 ? ' distraction' : ' distractions');
+                    
+                    // Start breathing sequence
+                    setTimeout(runBreathingSequence, 200);
+                });
+            } else {
+                // Fallback for direct browser preview
+                document.getElementById('lbl-proc').innerText = 'chrome.exe';
+                document.getElementById('lbl-site').innerText = 'youtube.com';
+                document.getElementById('lbl-target-site').innerText = 'youtube.com';
+                document.getElementById('lbl-open-count').innerText = '8 distractions';
+                setTimeout(runBreathingSequence, 200);
+            }
+        }
+
+        window.addEventListener('pywebviewready', initPage);
+        // Fallback in case pywebviewready is not fired
+        setTimeout(() => {
+            if (!window.pywebview || !window.pywebview.api) {
+                initPage();
+            }
+        }, 800);
+    </script>
+</body>
+</html>
